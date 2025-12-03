@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     
-    <!-- Fonts: Outfit & Plus Jakarta Sans (Optimized Loading) -->
+    <!-- Fonts: Outfit & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,12 +41,17 @@
                         }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.8s ease-out', // Diperlambat agar lebih elegan
+                        'float': 'float 6s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -58,275 +63,266 @@
         body {
             background-color: #050507;
             color: #e2e8f0;
-            overflow-x: hidden; /* Mencegah scroll horizontal di HP */
-            -webkit-tap-highlight-color: transparent; /* Hilangkan highlight biru di mobile saat klik */
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- LIGHTWEIGHT BACKGROUND (No Heavy Blur) --- */
-        /* Digunakan sebagai fallback jika video tidak memuat */
-        .tech-bg {
+        /* --- HIGH PERFORMANCE VIDEO BACKGROUND --- */
+        #bg-video-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
             z-index: -2;
-            background: radial-gradient(circle at top right, #1e1b4b 0%, #050507 40%),
-                        radial-gradient(circle at bottom left, #111827 0%, #050507 40%);
         }
-        
-        /* Video Background Styling */
+
         #bg-video {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
+            min-width: 100%; 
+            min-height: 100%; 
+            width: auto; 
             height: auto;
-            z-index: -1;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) translate3d(0, 0, 0); /* Force GPU Acceleration */
             object-fit: cover;
-            filter: brightness(0.6); /* Sedikit digelapkan agar teks terbaca */
+            /* Filter untuk membuat video sedikit lebih gelap agar teks terbaca, tapi tetap vibrant */
+            filter: brightness(0.8) contrast(1.1); 
+            will-change: transform; /* Hint to browser for optimization */
         }
 
-        /* Grid Pattern (CSS Only - Very Light) */
-        .grid-pattern {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: -1;
-            pointer-events: none;
+        /* Fallback jika video gagal load */
+        .video-fallback {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #000000 100%);
+            z-index: -3;
         }
 
-        /* --- OPTIMIZED CARDS --- */
+        /* --- TRANSPARENT GLASSMORPHISM (ELEGANT STYLE) --- */
         .glass-card {
-            background: rgba(15, 16, 20, 0.85); /* Lebih solid agar ringan render-nya */
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            /* Menghapus backdrop-filter blur yang berat di HP low-end */
+            /* Transparansi tinggi (0.4) agar video di belakang terlihat */
+            background: rgba(10, 10, 15, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Blur yang kuat untuk efek kaca es premium */
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        @supports (backdrop-filter: blur(10px)) {
-            .glass-card {
-                background: rgba(15, 16, 20, 0.7);
-                backdrop-filter: blur(12px); /* Blur dikurangi */
-                -webkit-backdrop-filter: blur(12px);
-            }
+        /* Khusus untuk Sidebar Dashboard (lebih solid agar fokus) */
+        .dashboard-glass {
+            background: rgba(15, 16, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         /* --- INPUTS --- */
+        /* Input field juga dibuat semi-transparan */
         .premium-input {
-            background: #16181d;
-            border: 1px solid #2d3038;
-            transition: border-color 0.2s;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            color: white;
         }
         .premium-input:focus {
+            background: rgba(0, 0, 0, 0.6);
             border-color: #6366f1;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); /* Glow effect */
             outline: none;
+        }
+        .premium-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
         /* --- UTILS --- */
         .page-section { display: none; }
-        .page-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        .page-section.active { display: block; animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
         
-        /* Sidebar transition for Mobile */
-        .sidebar-mobile {
-            transition: transform 0.3s ease-in-out;
-        }
+        .sidebar-mobile { transition: transform 0.3s ease-in-out; }
+        
+        /* Smooth Text Rendering */
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     </style>
 </head>
 <body class="font-sans text-sm md:text-base selection:bg-brand-primary selection:text-white">
 
-    <!-- LIVE BACKGROUND VIDEO -->
-    <!-- Pastikan file video ini ada di folder yang sama -->
-    <video autoplay muted loop playsinline id="bg-video">
-        <source src="blue-bloom-among-the-ruins.3840x2160.mp4" type="video/mp4">
-        Your browser does not support HTML5 video.
-    </video>
-    
-    <!-- Fallback Background & Pattern -->
-    <div class="tech-bg"></div>
-    <div class="grid-pattern"></div>
+    <!-- LIVE WALLPAPER CONTAINER -->
+    <div id="bg-video-container">
+        <!-- Fallback color -->
+        <div class="video-fallback"></div>
+        <!-- Video File -->
+        <video autoplay muted loop playsinline preload="auto" id="bg-video">
+            <source src="blue-bloom-among-the-ruins.3840x2160.mp4" type="video/mp4">
+            <!-- Browser tidak support video -->
+        </video>
+        <!-- Overlay tipis agar teks tetap kontras -->
+        <div class="absolute inset-0 bg-black/30 z-[-1]"></div>
+    </div>
 
     <!-- LOGIN / AUTH SECTION -->
     <main id="auth-container" class="relative w-full min-h-screen flex items-center justify-center p-4">
         
-        <!-- Login Card -->
-        <div id="login-view" class="glass-card relative z-10 w-full max-w-5xl h-auto md:min-h-[600px] rounded-3xl flex flex-col md:flex-row overflow-hidden animate-fade-in shadow-2xl">
+        <!-- Login Card (Transparent Glass) -->
+        <div id="login-view" class="glass-card relative z-10 w-full max-w-5xl h-auto md:min-h-[600px] rounded-3xl flex flex-col md:flex-row overflow-hidden animate-fade-in border border-white/10">
             
             <!-- Left Side: Form -->
-            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-dark-card/80 backdrop-blur-md">
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                 
                 <!-- Logo -->
                 <div class="flex items-center gap-2 mb-8 md:mb-12">
-                    <div class="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white shadow-lg shadow-brand-primary/20">
+                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white shadow-lg backdrop-blur-sm border border-white/20">
                         <i class="fas fa-cube text-xs"></i>
                     </div>
-                    <span class="font-heading font-bold text-lg tracking-wide text-white">PRESCIENT</span>
+                    <span class="font-heading font-bold text-lg tracking-wide text-white drop-shadow-md">PRESCIENT</span>
                 </div>
 
                 <div class="mb-8">
-                    <h1 class="font-heading text-3xl md:text-4xl font-bold text-white mb-2">
-                        Welcome <span class="text-brand-primary">Back</span>
+                    <h1 class="font-heading text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+                        Welcome <span class="text-brand-primary drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">Back</span>
                     </h1>
-                    <p class="text-gray-400 font-light">
+                    <p class="text-gray-200 font-light text-lg">
                         Masuk untuk mengakses dashboard prediksi.
                     </p>
                 </div>
 
                 <!-- Form -->
                 <form id="login-form" class="space-y-5">
-                    <div id="login-error" class="hidden flex items-center gap-2 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20 animate-pulse">
+                    <div id="login-error" class="hidden flex items-center gap-2 text-red-200 text-sm bg-red-500/20 p-3 rounded-lg border border-red-500/30 animate-pulse backdrop-blur-sm">
                         <i class="fas fa-circle-exclamation"></i> Username/Password salah.
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Username</label>
+                        <label class="text-xs font-bold text-gray-300 uppercase tracking-wider ml-1">Username</label>
                         <div class="relative">
-                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                             <input type="text" id="username" placeholder="Cth: eiz" 
-                                class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                                class="premium-input w-full rounded-xl pl-10 pr-5 py-3.5 text-white focus:outline-none">
                         </div>
                     </div>
 
                     <!-- Password Field with Toggle -->
                     <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                        <label class="text-xs font-bold text-gray-300 uppercase tracking-wider ml-1">Password</label>
                         <div class="relative">
-                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                             <input type="password" id="password" placeholder="••••••••" 
-                                class="premium-input w-full rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 focus:outline-none">
-                            <button type="button" id="toggle-login-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors focus:outline-none">
+                                class="premium-input w-full rounded-xl pl-10 pr-10 py-3.5 text-white focus:outline-none">
+                            <button type="button" id="toggle-login-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="flex items-center justify-between pt-1">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" class="rounded border-gray-600 bg-transparent text-brand-primary focus:ring-0">
-                            <span class="text-xs text-gray-400">Ingat saya</span>
+                        <label class="flex items-center space-x-2 cursor-pointer group">
+                            <div class="w-4 h-4 rounded border border-gray-400 bg-transparent flex items-center justify-center transition-colors group-hover:border-white">
+                                <input type="checkbox" class="hidden peer">
+                                <div class="w-2 h-2 bg-white rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            </div>
+                            <span class="text-xs text-gray-300 group-hover:text-white transition-colors">Ingat saya</span>
                         </label>
-                        <a href="#" id="forgot-pass-link" class="text-xs font-medium text-brand-primary hover:text-white transition-colors">Lupa Password?</a>
+                        <a href="#" id="forgot-pass-link" class="text-xs font-medium text-brand-primary hover:text-white hover:underline transition-all">Lupa Password?</a>
                     </div>
 
-                    <button type="submit" class="w-full bg-brand-primary hover:bg-indigo-500 text-white font-heading font-bold tracking-wide py-3.5 rounded-xl shadow-lg shadow-brand-primary/20 transition-all active:scale-95 mt-4">
+                    <button type="submit" class="w-full bg-brand-primary hover:bg-indigo-500 text-white font-heading font-bold tracking-wide py-4 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all active:scale-95 mt-4 border border-indigo-400/20">
                         SIGN IN
                     </button>
                 </form>
 
-                <div class="mt-8 pt-6 border-t border-white/5 text-center md:text-left">
-                    <p class="text-xs text-gray-600">
-                        Belum punya akun? <a href="#" id="to-register-link" class="text-brand-primary hover:text-white transition-colors font-medium">Daftar</a>
+                <div class="mt-8 pt-6 border-t border-white/10 text-center md:text-left">
+                    <p class="text-xs text-gray-300">
+                        Belum punya akun? <a href="#" id="to-register-link" class="text-white font-bold hover:text-brand-primary transition-colors underline decoration-brand-primary decoration-2 underline-offset-4">Daftar Sekarang</a>
                     </p>
                 </div>
             </div>
 
-            <!-- Right Side: Visual (Optimized - No heavy image) -->
-            <div class="hidden md:flex w-1/2 relative items-center justify-center overflow-hidden">
-                <!-- Abstract Lines (CSS Only) -->
-                <!-- Removed duplicate bg to let video shine through or use semi-transparent overlay -->
-                <div class="absolute inset-0 bg-black/40"></div> 
-                
-                <div class="relative z-10 glass-card p-8 rounded-2xl w-80 border-l-4 border-l-brand-accent">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
-                                <i class="fas fa-robot text-brand-accent"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-white font-bold font-heading text-sm">AI Agent</h4>
-                                <p class="text-gray-400 text-xs">System Ready</p>
-                            </div>
-                        </div>
-                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <!-- Right Side: Visual (Hanya text minimalis agar Video terlihat) -->
+            <div class="hidden md:flex w-1/2 relative items-center justify-center overflow-hidden border-l border-white/5">
+                <!-- Kita biarkan kosong/transparan agar video background terlihat jelas dan indah -->
+                <div class="relative z-10 p-10 text-center animate-float">
+                    <div class="w-20 h-20 bg-white/5 rounded-2xl mx-auto mb-6 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl">
+                        <i class="fas fa-chart-line text-4xl text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"></i>
                     </div>
-                    <div class="space-y-3">
-                        <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-brand-accent w-[75%] rounded-full"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-gray-400 font-mono">
-                            <span>Dataset UCI</span>
-                            <span class="text-brand-accent">Optimized</span>
-                        </div>
-                    </div>
+                    <h2 class="font-heading text-3xl font-bold text-white mb-2 drop-shadow-lg">AI-Powered Growth</h2>
+                    <p class="text-gray-200 text-sm font-light max-w-xs mx-auto leading-relaxed drop-shadow-md">
+                        Optimalkan strategi penjualan Anda dengan presisi data dan kecerdasan buatan.
+                    </p>
                 </div>
             </div>
         </div>
 
         <!-- Register View -->
-        <div id="register-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4 bg-dark-card/90 backdrop-blur-md">
-            
+        <div id="register-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4">
             <div class="text-center mb-6 mt-2">
-                <div class="w-12 h-12 bg-brand-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-brand-secondary text-xl">
-                    <i class="fas fa-user-plus"></i>
+                <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/20 shadow-lg">
+                    <i class="fas fa-user-plus text-2xl text-white"></i>
                 </div>
-                <h2 class="font-heading text-2xl font-bold text-white">Daftar Akun</h2>
-                <p class="text-gray-400 text-sm mt-1">Buat akun baru untuk memulai.</p>
+                <h2 class="font-heading text-2xl font-bold text-white drop-shadow-md">Daftar Akun</h2>
+                <p class="text-gray-300 text-sm mt-1">Buat akun baru untuk memulai perjalanan Anda.</p>
             </div>
             
             <form id="register-form" class="space-y-4">
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Email (Gmail)</label>
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider ml-1">Email (Gmail)</label>
                     <div class="relative">
-                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                         <input type="email" required placeholder="nama@gmail.com" 
-                            class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                            class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white focus:outline-none">
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Username</label>
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider ml-1">Username</label>
                     <div class="relative">
-                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                         <input type="text" required placeholder="Username" 
-                            class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                            class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white focus:outline-none">
                     </div>
                 </div>
                 <!-- Register Password Field with Toggle -->
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider ml-1">Password</label>
                     <div class="relative">
-                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                         <input type="password" id="reg-password" required placeholder="••••••••" 
-                            class="premium-input w-full rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 focus:outline-none">
-                        <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors focus:outline-none">
+                            class="premium-input w-full rounded-xl pl-10 pr-10 py-3 text-white focus:outline-none">
+                        <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
                 
-                <button type="submit" class="w-full bg-brand-secondary hover:bg-purple-500 text-white font-bold py-3 rounded-xl mt-4 transition-colors">
+                <button type="submit" class="w-full bg-brand-primary hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl mt-4 transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-indigo-400/20">
                     Daftar Akun
                 </button>
             </form>
-            <div class="mt-6 pt-4 border-t border-white/5 text-center">
-                <p class="text-xs text-gray-600">
-                    Sudah punya akun? <a href="#" id="to-login-link" class="text-brand-secondary hover:text-white transition-colors font-medium">Masuk</a>
+            <div class="mt-6 pt-4 border-t border-white/10 text-center">
+                <p class="text-xs text-gray-300">
+                    Sudah punya akun? <a href="#" id="to-login-link" class="text-white hover:text-brand-primary font-bold transition-colors underline decoration-brand-primary underline-offset-4">Masuk</a>
                 </p>
             </div>
         </div>
 
-        <!-- Forgot Password View (Simpel) -->
-        <div id="forgot-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4 bg-dark-card/90 backdrop-blur-md">
-            <button class="back-to-login absolute top-4 left-4 text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5">
+        <!-- Forgot Password View -->
+        <div id="forgot-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4">
+            <button class="back-to-login absolute top-4 left-4 text-gray-300 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
                 <i class="fas fa-arrow-left"></i>
             </button>
             
             <div class="text-center mb-6 mt-2">
-                <div class="w-12 h-12 bg-brand-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-brand-secondary text-xl">
-                    <i class="fas fa-key"></i>
+                <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/20 shadow-lg">
+                    <i class="fas fa-key text-2xl text-white"></i>
                 </div>
-                <h2 class="font-heading text-2xl font-bold text-white">Reset Akses</h2>
-                <p class="text-gray-400 text-sm mt-1">Masukkan email terdaftar Anda.</p>
+                <h2 class="font-heading text-2xl font-bold text-white drop-shadow-md">Reset Akses</h2>
+                <p class="text-gray-300 text-sm mt-1">Masukkan email terdaftar Anda.</p>
             </div>
             
             <form id="forgot-form" class="space-y-4">
                 <div class="relative">
-                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                     <input type="email" required placeholder="name@company.com" 
-                        class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                        class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white focus:outline-none">
                 </div>
                 
-                <button type="submit" class="w-full bg-brand-secondary hover:bg-purple-500 text-white font-bold py-3 rounded-xl mt-2 transition-colors">
+                <button type="submit" class="w-full bg-brand-secondary hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl mt-2 transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-purple-400/20">
                     Kirim Instruksi
                 </button>
             </form>
@@ -336,12 +332,11 @@
     <!-- DASHBOARD SECTION -->
     <div id="dashboard-container" class="hidden min-h-screen bg-transparent flex text-gray-200 font-sans relative">
         
-        <!-- Background untuk Dashboard (Bisa tetap gelap solid atau video jika diinginkan) -->
-        <!-- Kita gunakan bg-dark-bg yang solid agar konten dashboard mudah dibaca -->
-        <div class="fixed inset-0 bg-dark-bg z-[-1]"></div>
+        <!-- Background untuk Dashboard (SOLID GELAP agar video tidak mengganggu data) -->
+        <div class="fixed inset-0 bg-[#050507] z-[-1]"></div>
 
         <!-- Mobile Header (Sticky) -->
-        <header class="md:hidden fixed top-0 left-0 w-full h-16 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border flex items-center justify-between px-4 z-50">
+        <header class="md:hidden fixed top-0 left-0 w-full h-16 bg-dark-card/90 backdrop-blur-md border-b border-dark-border flex items-center justify-between px-4 z-50">
             <div class="flex items-center gap-2">
                 <div class="w-6 h-6 rounded bg-brand-primary flex items-center justify-center text-white">
                     <i class="fas fa-cube text-[10px]"></i>
@@ -357,7 +352,7 @@
         <div id="sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 hidden backdrop-blur-sm transition-opacity"></div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-64 bg-dark-card border-r border-dark-border flex flex-col z-50 transform -translate-x-full md:translate-x-0 sidebar-mobile">
+        <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-64 dashboard-glass border-r border-dark-border flex flex-col z-50 transform -translate-x-full md:translate-x-0 sidebar-mobile">
             <!-- Close Button Mobile -->
             <button id="close-sidebar" class="md:hidden absolute top-4 right-4 text-gray-400">
                 <i class="fas fa-times"></i>
@@ -371,7 +366,7 @@
                     <span class="font-heading font-bold text-lg text-white tracking-wide">Prescient</span>
                 </div>
 
-                <div class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-4 px-2">Menu Utama</div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Menu Utama</div>
                 
                 <nav class="space-y-1">
                     <a href="#dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
@@ -394,7 +389,7 @@
                 </nav>
             </div>
 
-            <div class="mt-auto p-6 border-t border-dark-border bg-dark-surface/50">
+            <div class="mt-auto p-6 border-t border-white/5">
                 <button id="logout-btn" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-400 border border-red-500/10 hover:bg-red-500/10 rounded-lg transition-all">
                     <i class="fas fa-power-off"></i> Keluar
                 </button>
@@ -414,10 +409,10 @@
                         <p class="text-gray-400 text-sm">Real-time analysis of deposit campaign metrics.</p>
                     </header>
 
-                    <!-- Stats Grid -->
+                    <!-- Stats Grid (Using Dashboard Glass style) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <!-- Stat Card 1 -->
-                        <div class="glass-card p-5 rounded-xl border-l-4 border-l-brand-primary">
+                        <div class="dashboard-glass p-5 rounded-xl border-l-4 border-l-brand-primary">
                             <p class="text-gray-400 text-xs font-bold uppercase mb-1">Total Nasabah</p>
                             <h3 class="font-heading text-2xl font-bold text-white" id="stat-total">0</h3>
                             <div class="mt-2 text-xs flex items-center gap-1 text-green-400">
@@ -426,7 +421,7 @@
                         </div>
 
                         <!-- Stat Card 2 -->
-                        <div class="glass-card p-5 rounded-xl border-l-4 border-l-brand-accent">
+                        <div class="dashboard-glass p-5 rounded-xl border-l-4 border-l-brand-accent">
                             <p class="text-gray-400 text-xs font-bold uppercase mb-1">Hot Leads</p>
                             <h3 class="font-heading text-2xl font-bold text-white" id="stat-hot">0</h3>
                             <div class="mt-2 text-xs flex items-center gap-1 text-brand-accent">
@@ -435,7 +430,7 @@
                         </div>
 
                         <!-- Stat Card 3 -->
-                        <div class="glass-card p-5 rounded-xl border-l-4 border-l-brand-secondary">
+                        <div class="dashboard-glass p-5 rounded-xl border-l-4 border-l-brand-secondary">
                             <p class="text-gray-400 text-xs font-bold uppercase mb-1">Konversi AI</p>
                             <h3 class="font-heading text-2xl font-bold text-white">18.5%</h3>
                             <div class="mt-2 text-xs flex items-center gap-1 text-green-400">
@@ -444,7 +439,7 @@
                         </div>
 
                          <!-- Stat Card 4 -->
-                         <div class="glass-card p-5 rounded-xl border-l-4 border-l-white">
+                         <div class="dashboard-glass p-5 rounded-xl border-l-4 border-l-white">
                             <p class="text-gray-400 text-xs font-bold uppercase mb-1">Call Time</p>
                             <h3 class="font-heading text-2xl font-bold text-white">2m 45s</h3>
                             <div class="mt-2 text-xs flex items-center gap-1 text-gray-400">
@@ -456,7 +451,7 @@
                     <!-- Charts Area -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                         <!-- Chart Main -->
-                        <div class="lg:col-span-2 glass-card p-5 rounded-xl">
+                        <div class="lg:col-span-2 dashboard-glass p-5 rounded-xl">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-heading font-bold text-white text-base">Distribusi Lead</h3>
                             </div>
@@ -466,7 +461,7 @@
                         </div>
 
                         <!-- Progress Bars -->
-                        <div class="glass-card p-5 rounded-xl">
+                        <div class="dashboard-glass p-5 rounded-xl">
                             <h3 class="font-heading font-bold text-white text-base mb-4">Faktor Utama</h3>
                             
                             <div class="space-y-4">
@@ -514,10 +509,10 @@
                                 <i class="fas fa-file-export"></i> Export CSV
                             </button>
                         </div>
-                        <div class="flex flex-col md:flex-row gap-2 bg-dark-card p-2 rounded-xl border border-dark-border justify-between items-center">
+                        <div class="flex flex-col md:flex-row gap-2 dashboard-glass p-2 rounded-xl border border-dark-border justify-between items-center">
                             <div class="flex gap-2 w-full md:w-auto">
-                                <input type="text" id="search-lead" placeholder="Cari nama..." class="bg-transparent text-white text-sm rounded-lg px-3 py-2 focus:outline-none w-full md:w-64 border border-gray-800 focus:border-brand-primary">
-                                <select id="filter-score" class="bg-dark-bg text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none border border-gray-800">
+                                <input type="text" id="search-lead" placeholder="Cari nama..." class="bg-transparent text-white text-sm rounded-lg px-3 py-2 focus:outline-none w-full md:w-64 border border-gray-700 focus:border-brand-primary">
+                                <select id="filter-score" class="bg-dark-card text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none border border-gray-700">
                                     <option value="all">Semua Skor</option>
                                     <option value="hot">Hot Only</option>
                                     <option value="warm">Warm</option>
@@ -530,7 +525,7 @@
                         </div>
                     </header>
 
-                    <div class="glass-card rounded-xl overflow-hidden border border-white/5 flex flex-col">
+                    <div class="dashboard-glass rounded-xl overflow-hidden border border-white/5 flex flex-col">
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left whitespace-nowrap">
                                 <thead class="text-xs text-gray-500 uppercase bg-black/20 font-bold">
@@ -572,7 +567,7 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <!-- Step 1 -->
-                        <div class="glass-card p-6 rounded-2xl border-l-4 border-brand-primary relative">
+                        <div class="dashboard-glass p-6 rounded-2xl border-l-4 border-brand-primary relative">
                             <div class="absolute -top-4 -right-4 w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">1</div>
                             <h3 class="font-heading font-bold text-xl text-white mb-3">Analisis Dashboard</h3>
                             <p class="text-gray-400 text-sm leading-relaxed mb-4">
@@ -584,7 +579,7 @@
                         </div>
 
                         <!-- Step 2 -->
-                        <div class="glass-card p-6 rounded-2xl border-l-4 border-brand-accent relative">
+                        <div class="dashboard-glass p-6 rounded-2xl border-l-4 border-brand-accent relative">
                             <div class="absolute -top-4 -right-4 w-12 h-12 bg-brand-accent rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">2</div>
                             <h3 class="font-heading font-bold text-xl text-white mb-3">Eksekusi Daftar Prospek</h3>
                             <p class="text-gray-400 text-sm leading-relaxed mb-4">
@@ -597,7 +592,7 @@
                         </div>
 
                         <!-- Step 3 -->
-                        <div class="glass-card p-6 rounded-2xl border-l-4 border-brand-secondary relative">
+                        <div class="dashboard-glass p-6 rounded-2xl border-l-4 border-brand-secondary relative">
                             <div class="absolute -top-4 -right-4 w-12 h-12 bg-brand-secondary rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">3</div>
                             <h3 class="font-heading font-bold text-xl text-white mb-3">Gunakan Skrip AI</h3>
                             <p class="text-gray-400 text-sm leading-relaxed mb-4">
@@ -609,7 +604,7 @@
                         </div>
 
                         <!-- Step 4 -->
-                        <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500 relative">
+                        <div class="dashboard-glass p-6 rounded-2xl border-l-4 border-green-500 relative">
                             <div class="absolute -top-4 -right-4 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">4</div>
                             <h3 class="font-heading font-bold text-xl text-white mb-3">Log Status & Export</h3>
                             <p class="text-gray-400 text-sm leading-relaxed mb-4">
@@ -633,7 +628,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Card 1 -->
-                        <div class="glass-card p-4 rounded-xl flex items-center gap-4">
+                        <div class="dashboard-glass p-4 rounded-xl flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-bold text-white border border-gray-600">MR</div>
                             <div>
                                 <h4 class="font-bold text-white text-sm">M. Rivaldy Pratama</h4>
@@ -643,7 +638,7 @@
                         </div>
 
                         <!-- Card 2 -->
-                        <div class="glass-card p-4 rounded-xl flex items-center gap-4">
+                        <div class="dashboard-glass p-4 rounded-xl flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-bold text-white border border-gray-600">EP</div>
                             <div>
                                 <h4 class="font-bold text-white text-sm">Eidelwise Prily S.</h4>
@@ -659,10 +654,10 @@
     
     <!-- Script Modal (Mobile Optimized) -->
     <div id="script-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden px-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 transform transition-all duration-300 scale-95 opacity-0" id="modal-content-box">
+        <div class="dashboard-glass w-full max-w-md rounded-2xl p-6 transform transition-all duration-300 scale-95 opacity-0" id="modal-content-box">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-heading text-lg font-bold text-white">Panduan Bicara</h3>
-                <button onclick="closeScriptModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white"><i class="fas fa-times"></i></button>
+                <button onclick="closeScriptModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20"><i class="fas fa-times"></i></button>
             </div>
             
             <div class="mb-4">
@@ -673,7 +668,7 @@
                 <p id="script-content" class="text-gray-300 text-sm leading-relaxed italic">...</p>
             </div>
 
-            <button onclick="closeScriptModal()" class="w-full bg-white/10 text-white font-bold py-3 rounded-xl">Tutup</button>
+            <button onclick="closeScriptModal()" class="w-full bg-white/10 text-white font-bold py-3 rounded-xl hover:bg-white/20 transition-colors">Tutup</button>
         </div>
     </div>
 
