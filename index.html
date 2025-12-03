@@ -357,8 +357,8 @@
                         <span class="ml-auto text-[10px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded-full font-bold">LIVE</span>
                     </a>
                     <a href="#analisis" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
-                        <i class="fas fa-brain w-5 group-hover:text-brand-secondary transition-colors"></i>
-                        <span class="font-medium">AI Insights</span>
+                        <i class="fas fa-book-open w-5 group-hover:text-brand-secondary transition-colors"></i>
+                        <span class="font-medium">Panduan</span>
                     </a>
                     <a href="#tentang" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
                         <i class="fas fa-info-circle w-5 group-hover:text-white transition-colors"></i>
@@ -478,9 +478,14 @@
                 <!-- CONTENT: PROSPEK -->
                 <section id="page-prospek" class="page-section max-w-7xl mx-auto">
                     <header class="mb-6 flex flex-col gap-4">
-                        <div>
-                            <h2 class="font-heading text-2xl font-bold text-white mb-1">Daftar Prospek</h2>
-                            <p class="text-gray-400 text-sm">Prioritas lead hari ini berdasarkan AI.</p>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h2 class="font-heading text-2xl font-bold text-white mb-1">Daftar Prospek</h2>
+                                <p class="text-gray-400 text-sm">Prioritas lead hari ini berdasarkan AI.</p>
+                            </div>
+                            <button onclick="downloadCSV()" class="hidden md:flex items-center gap-2 bg-brand-primary hover:bg-indigo-500 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">
+                                <i class="fas fa-file-export"></i> Export CSV
+                            </button>
                         </div>
                         <div class="flex flex-col md:flex-row gap-2 bg-dark-card p-2 rounded-xl border border-dark-border justify-between items-center">
                             <div class="flex gap-2 w-full md:w-auto">
@@ -531,41 +536,61 @@
                     </div>
                 </section>
 
-                <!-- CONTENT: AI INSIGHTS -->
+                <!-- CONTENT: PANDUAN / AI INSIGHTS (REPLACED) -->
                 <section id="page-analisis" class="page-section max-w-5xl mx-auto">
-                    <div class="text-center mb-8">
-                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-white">Analisis Model AI</h2>
+                    <div class="text-center mb-10">
+                        <h2 class="font-heading text-3xl font-bold text-white mb-2">Panduan Penggunaan Sistem</h2>
+                        <p class="text-gray-400 text-sm">Ikuti langkah-langkah berikut untuk memaksimalkan hasil penjualan Anda.</p>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="glass-card p-6 rounded-2xl border-t border-t-brand-secondary/30">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-lg bg-brand-secondary/10 flex items-center justify-center text-brand-secondary">
-                                    <i class="fas fa-microscope"></i>
-                                </div>
-                                <h3 class="font-heading font-bold text-white">Research Question 1</h3>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Step 1 -->
+                        <div class="glass-card p-6 rounded-2xl border-l-4 border-brand-primary relative">
+                            <div class="absolute -top-4 -right-4 w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">1</div>
+                            <h3 class="font-heading font-bold text-xl text-white mb-3">Analisis Dashboard</h3>
                             <p class="text-gray-400 text-sm leading-relaxed mb-4">
-                                "Faktor demografis dan transaksional apa yang paling signifikan?"
+                                Mulailah hari Anda dengan melihat <strong>Dashboard Utama</strong>. Perhatikan metrik <strong>Hot Leads</strong> untuk mengetahui berapa banyak nasabah prioritas yang harus dihubungi hari ini.
                             </p>
-                            <div class="p-3 bg-white/5 rounded-lg border-l-2 border-brand-secondary text-xs text-gray-300">
-                                <strong>Jawaban:</strong> Durasi kontak terakhir & hasil kampanye sebelumnya adalah prediktor terkuat.
+                            <div class="bg-white/5 p-3 rounded-lg text-xs text-gray-300">
+                                <i class="fas fa-lightbulb text-yellow-400 mr-2"></i><strong>Tips:</strong> Fokus pada nasabah dengan skor probabilitas > 80%.
                             </div>
                         </div>
 
-                        <div class="glass-card p-6 rounded-2xl border-t border-t-brand-primary/30">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-                                    <i class="fas fa-code-branch"></i>
-                                </div>
-                                <h3 class="font-heading font-bold text-white">Research Question 2</h3>
-                            </div>
+                        <!-- Step 2 -->
+                        <div class="glass-card p-6 rounded-2xl border-l-4 border-brand-accent relative">
+                            <div class="absolute -top-4 -right-4 w-12 h-12 bg-brand-accent rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">2</div>
+                            <h3 class="font-heading font-bold text-xl text-white mb-3">Eksekusi Daftar Prospek</h3>
                             <p class="text-gray-400 text-sm leading-relaxed mb-4">
-                                "Model ML mana yang memberikan performa terbaik?"
+                                Buka menu <strong>Data Prospek</strong>. Gunakan fitur filter untuk menampilkan "Hot Only". Hubungi nasabah menggunakan tombol aksi cepat:
                             </p>
-                            <div class="p-3 bg-white/5 rounded-lg border-l-2 border-brand-primary text-xs text-gray-300">
-                                <strong>Jawaban:</strong> XGBoost (AUC 0.94) mengungguli Random Forest & SVM.
+                            <ul class="text-sm text-gray-400 space-y-2 list-disc list-inside">
+                                <li><i class="fab fa-whatsapp text-green-400 mr-1"></i> Tombol WA: Membuka chat dengan pesan otomatis.</li>
+                                <li><i class="fas fa-comment text-brand-primary mr-1"></i> Ikon Chat: Membuka panduan skrip bicara.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="glass-card p-6 rounded-2xl border-l-4 border-brand-secondary relative">
+                            <div class="absolute -top-4 -right-4 w-12 h-12 bg-brand-secondary rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">3</div>
+                            <h3 class="font-heading font-bold text-xl text-white mb-3">Gunakan Skrip AI</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                                Jangan bingung harus bicara apa. Klik ikon pesan untuk melihat <strong>Skrip Dinamis</strong> yang disesuaikan dengan profil nasabah (Hot/Warm/Cold).
+                            </p>
+                            <div class="bg-white/5 p-3 rounded-lg text-xs text-gray-300">
+                                <i class="fas fa-quote-left text-brand-secondary mr-2"></i> Skrip "Hot Lead" fokus pada penawaran terbatas (closing), sedangkan "Warm Lead" fokus pada edukasi.
                             </div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500 relative">
+                            <div class="absolute -top-4 -right-4 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center font-bold text-white shadow-lg text-lg">4</div>
+                            <h3 class="font-heading font-bold text-xl text-white mb-3">Log Status & Export</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                                Setelah menghubungi, <strong>WAJIB</strong> mengubah status di dropdown (Selesai/Pending). Ini akan melatih AI untuk prediksi yang lebih akurat besok.
+                            </p>
+                            <button onclick="document.querySelector('a[href=\'#prospek\']').click()" class="text-green-400 text-xs font-bold hover:underline">
+                                <i class="fas fa-download mr-1"></i> Gunakan fitur Export CSV untuk laporan harian.
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -961,6 +986,28 @@
                 renderTable();
             }
         });
+
+        // --- NEW FEATURE: EXPORT TO CSV ---
+        function downloadCSV() {
+            // Header
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID,Nama,Pekerjaan,Skor Probabilitas,Prediksi,Status,No Telepon\n";
+
+            // Rows (Use filteredLeads to respect current view)
+            filteredLeads.forEach(row => {
+                let rowStr = `${row.id},${row.name},${row.job},${row.score},${row.prediction},${row.status},${row.phone}`;
+                csvContent += rowStr + "\n";
+            });
+
+            // Download Trigger
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "data_prospek_prescient.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
         // --- Modal Logic ---
         function openScriptModal(id) {
