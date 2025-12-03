@@ -63,14 +63,29 @@
         }
 
         /* --- LIGHTWEIGHT BACKGROUND (No Heavy Blur) --- */
+        /* Digunakan sebagai fallback jika video tidak memuat */
         .tech-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
+            z-index: -2;
             background: radial-gradient(circle at top right, #1e1b4b 0%, #050507 40%),
                         radial-gradient(circle at bottom left, #111827 0%, #050507 40%);
         }
         
+        /* Video Background Styling */
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            object-fit: cover;
+            filter: brightness(0.6); /* Sedikit digelapkan agar teks terbaca */
+        }
+
         /* Grid Pattern (CSS Only - Very Light) */
         .grid-pattern {
             position: fixed;
@@ -121,7 +136,14 @@
 </head>
 <body class="font-sans text-sm md:text-base selection:bg-brand-primary selection:text-white">
 
-    <!-- LIGHTWEIGHT BACKGROUNDS -->
+    <!-- LIVE BACKGROUND VIDEO -->
+    <!-- Pastikan file video ini ada di folder yang sama -->
+    <video autoplay muted loop playsinline id="bg-video">
+        <source src="blue-bloom-among-the-ruins.3840x2160.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+    
+    <!-- Fallback Background & Pattern -->
     <div class="tech-bg"></div>
     <div class="grid-pattern"></div>
 
@@ -132,7 +154,7 @@
         <div id="login-view" class="glass-card relative z-10 w-full max-w-5xl h-auto md:min-h-[600px] rounded-3xl flex flex-col md:flex-row overflow-hidden animate-fade-in shadow-2xl">
             
             <!-- Left Side: Form -->
-            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-dark-card/50">
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-dark-card/80 backdrop-blur-md">
                 
                 <!-- Logo -->
                 <div class="flex items-center gap-2 mb-8 md:mb-12">
@@ -200,9 +222,10 @@
             </div>
 
             <!-- Right Side: Visual (Optimized - No heavy image) -->
-            <div class="hidden md:flex w-1/2 relative bg-gradient-to-br from-gray-900 to-black items-center justify-center overflow-hidden">
+            <div class="hidden md:flex w-1/2 relative items-center justify-center overflow-hidden">
                 <!-- Abstract Lines (CSS Only) -->
-                <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #6366f1 10px, #6366f1 11px);"></div>
+                <!-- Removed duplicate bg to let video shine through or use semi-transparent overlay -->
+                <div class="absolute inset-0 bg-black/40"></div> 
                 
                 <div class="relative z-10 glass-card p-8 rounded-2xl w-80 border-l-4 border-l-brand-accent">
                     <div class="flex items-center justify-between mb-4">
@@ -231,7 +254,7 @@
         </div>
 
         <!-- Register View -->
-        <div id="register-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4">
+        <div id="register-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4 bg-dark-card/90 backdrop-blur-md">
             
             <div class="text-center mb-6 mt-2">
                 <div class="w-12 h-12 bg-brand-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-brand-secondary text-xl">
@@ -283,7 +306,7 @@
         </div>
 
         <!-- Forgot Password View (Simpel) -->
-        <div id="forgot-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4">
+        <div id="forgot-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4 bg-dark-card/90 backdrop-blur-md">
             <button class="back-to-login absolute top-4 left-4 text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5">
                 <i class="fas fa-arrow-left"></i>
             </button>
@@ -313,6 +336,10 @@
     <!-- DASHBOARD SECTION -->
     <div id="dashboard-container" class="hidden min-h-screen bg-transparent flex text-gray-200 font-sans relative">
         
+        <!-- Background untuk Dashboard (Bisa tetap gelap solid atau video jika diinginkan) -->
+        <!-- Kita gunakan bg-dark-bg yang solid agar konten dashboard mudah dibaca -->
+        <div class="fixed inset-0 bg-dark-bg z-[-1]"></div>
+
         <!-- Mobile Header (Sticky) -->
         <header class="md:hidden fixed top-0 left-0 w-full h-16 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border flex items-center justify-between px-4 z-50">
             <div class="flex items-center gap-2">
