@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescient - Predictive Lead Scoring</title>
+    
+    <!-- Libraries (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    
+    <!-- Fonts: Outfit & Plus Jakarta Sans (Optimized Loading) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        heading: ['"Outfit"', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#050507',
+                            card: '#0f1014',
+                            border: '#1f2128',  
+                            input: '#16181d',   
+                            surface: '#131419'
+                        },
+                        brand: {
+                            primary: '#6366f1', // Indigo
+                            secondary: '#a855f7', // Purple
+                            accent: '#06b6d4', // Cyan
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050507;
+            color: #e2e8f0;
+            overflow-x: hidden; /* Mencegah scroll horizontal di HP */
+            -webkit-tap-highlight-color: transparent; /* Hilangkan highlight biru di mobile saat klik */
+        }
+
+        /* --- LIGHTWEIGHT BACKGROUND (No Heavy Blur) --- */
+        .tech-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at top right, #1e1b4b 0%, #050507 40%),
+                        radial-gradient(circle at bottom left, #111827 0%, #050507 40%);
+        }
+        
+        /* Grid Pattern (CSS Only - Very Light) */
+        .grid-pattern {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- OPTIMIZED CARDS --- */
+        .glass-card {
+            background: rgba(15, 16, 20, 0.85); /* Lebih solid agar ringan render-nya */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            /* Menghapus backdrop-filter blur yang berat di HP low-end */
+        }
+
+        @supports (backdrop-filter: blur(10px)) {
+            .glass-card {
+                background: rgba(15, 16, 20, 0.7);
+                backdrop-filter: blur(12px); /* Blur dikurangi */
+                -webkit-backdrop-filter: blur(12px);
+            }
+        }
+
+        /* --- INPUTS --- */
+        .premium-input {
+            background: #16181d;
+            border: 1px solid #2d3038;
+            transition: border-color 0.2s;
+        }
+        .premium-input:focus {
+            border-color: #6366f1;
+            outline: none;
+        }
+
+        /* --- UTILS --- */
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        
+        /* Sidebar transition for Mobile */
+        .sidebar-mobile {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="font-sans text-sm md:text-base selection:bg-brand-primary selection:text-white">
+
+    <!-- LIGHTWEIGHT BACKGROUNDS -->
+    <div class="tech-bg"></div>
+    <div class="grid-pattern"></div>
+
+    <!-- LOGIN / AUTH SECTION -->
+    <main id="auth-container" class="relative w-full min-h-screen flex items-center justify-center p-4">
+        
+        <!-- Login Card -->
+        <div id="login-view" class="glass-card relative z-10 w-full max-w-5xl h-auto md:min-h-[600px] rounded-3xl flex flex-col md:flex-row overflow-hidden animate-fade-in shadow-2xl">
+            
+            <!-- Left Side: Form -->
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-dark-card/50">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-2 mb-8 md:mb-12">
+                    <div class="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white shadow-lg shadow-brand-primary/20">
+                        <i class="fas fa-cube text-xs"></i>
+                    </div>
+                    <span class="font-heading font-bold text-lg tracking-wide text-white">PRESCIENT</span>
+                </div>
+
+                <div class="mb-8">
+                    <h1 class="font-heading text-3xl md:text-4xl font-bold text-white mb-2">
+                        Welcome <span class="text-brand-primary">Back</span>
+                    </h1>
+                    <p class="text-gray-400 font-light">
+                        Masuk untuk mengakses dashboard prediksi.
+                    </p>
+                </div>
+
+                <!-- Form -->
+                <form id="login-form" class="space-y-5">
+                    <div id="login-error" class="hidden flex items-center gap-2 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20 animate-pulse">
+                        <i class="fas fa-circle-exclamation"></i> Username/Password salah.
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Username</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                            <input type="text" id="username" placeholder="Cth: eiz" 
+                                class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Password Field with Toggle -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                            <input type="password" id="password" placeholder="••••••••" 
+                                class="premium-input w-full rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 focus:outline-none">
+                            <button type="button" id="toggle-login-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors focus:outline-none">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="rounded border-gray-600 bg-transparent text-brand-primary focus:ring-0">
+                            <span class="text-xs text-gray-400">Ingat saya</span>
+                        </label>
+                        <a href="#" id="forgot-pass-link" class="text-xs font-medium text-brand-primary hover:text-white transition-colors">Lupa Password?</a>
+                    </div>
+
+                    <button type="submit" class="w-full bg-brand-primary hover:bg-indigo-500 text-white font-heading font-bold tracking-wide py-3.5 rounded-xl shadow-lg shadow-brand-primary/20 transition-all active:scale-95 mt-4">
+                        SIGN IN
+                    </button>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-white/5 text-center md:text-left">
+                    <p class="text-xs text-gray-600">
+                        Belum punya akun? <a href="#" id="to-register-link" class="text-brand-primary hover:text-white transition-colors font-medium">Daftar</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Side: Visual (Optimized - No heavy image) -->
+            <div class="hidden md:flex w-1/2 relative bg-gradient-to-br from-gray-900 to-black items-center justify-center overflow-hidden">
+                <!-- Abstract Lines (CSS Only) -->
+                <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #6366f1 10px, #6366f1 11px);"></div>
+                
+                <div class="relative z-10 glass-card p-8 rounded-2xl w-80 border-l-4 border-l-brand-accent">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
+                                <i class="fas fa-robot text-brand-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold font-heading text-sm">AI Agent</h4>
+                                <p class="text-gray-400 text-xs">System Ready</p>
+                            </div>
+                        </div>
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-brand-accent w-[75%] rounded-full"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-gray-400 font-mono">
+                            <span>Dataset UCI</span>
+                            <span class="text-brand-accent">Optimized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register View -->
+        <div id="register-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4">
+            
+            <div class="text-center mb-6 mt-2">
+                <div class="w-12 h-12 bg-brand-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-brand-secondary text-xl">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2 class="font-heading text-2xl font-bold text-white">Daftar Akun</h2>
+                <p class="text-gray-400 text-sm mt-1">Buat akun baru untuk memulai.</p>
+            </div>
+            
+            <form id="register-form" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Email (Gmail)</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <input type="email" required placeholder="nama@gmail.com" 
+                            class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Username</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <input type="text" required placeholder="Username" 
+                            class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                    </div>
+                </div>
+                <!-- Register Password Field with Toggle -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                        <input type="password" id="reg-password" required placeholder="••••••••" 
+                            class="premium-input w-full rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 focus:outline-none">
+                        <button type="button" id="toggle-reg-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors focus:outline-none">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-brand-secondary hover:bg-purple-500 text-white font-bold py-3 rounded-xl mt-4 transition-colors">
+                    Daftar Akun
+                </button>
+            </form>
+            <div class="mt-6 pt-4 border-t border-white/5 text-center">
+                <p class="text-xs text-gray-600">
+                    Sudah punya akun? <a href="#" id="to-login-link" class="text-brand-secondary hover:text-white transition-colors font-medium">Masuk</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Forgot Password View (Simpel) -->
+        <div id="forgot-view" class="hidden glass-card relative z-20 w-full max-w-md p-8 rounded-3xl animate-fade-in mx-4">
+            <button class="back-to-login absolute top-4 left-4 text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
+            <div class="text-center mb-6 mt-2">
+                <div class="w-12 h-12 bg-brand-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-brand-secondary text-xl">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h2 class="font-heading text-2xl font-bold text-white">Reset Akses</h2>
+                <p class="text-gray-400 text-sm mt-1">Masukkan email terdaftar Anda.</p>
+            </div>
+            
+            <form id="forgot-form" class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="email" required placeholder="name@company.com" 
+                        class="premium-input w-full rounded-xl pl-10 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none">
+                </div>
+                
+                <button type="submit" class="w-full bg-brand-secondary hover:bg-purple-500 text-white font-bold py-3 rounded-xl mt-2 transition-colors">
+                    Kirim Instruksi
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard-container" class="hidden min-h-screen bg-transparent flex text-gray-200 font-sans relative">
+        
+        <!-- Mobile Header (Sticky) -->
+        <header class="md:hidden fixed top-0 left-0 w-full h-16 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border flex items-center justify-between px-4 z-50">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded bg-brand-primary flex items-center justify-center text-white">
+                    <i class="fas fa-cube text-[10px]"></i>
+                </div>
+                <span class="font-heading font-bold text-white">Prescient</span>
+            </div>
+            <button id="mobile-menu-btn" class="text-gray-300 hover:text-white p-2">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </header>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="md:hidden fixed inset-0 bg-black/50 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-64 bg-dark-card border-r border-dark-border flex flex-col z-50 transform -translate-x-full md:translate-x-0 sidebar-mobile">
+            <!-- Close Button Mobile -->
+            <button id="close-sidebar" class="md:hidden absolute top-4 right-4 text-gray-400">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand-primary/20">
+                        P
+                    </div>
+                    <span class="font-heading font-bold text-lg text-white tracking-wide">Prescient</span>
+                </div>
+
+                <div class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-4 px-2">Menu Utama</div>
+                
+                <nav class="space-y-1">
+                    <a href="#dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        <i class="fas fa-chart-pie w-5 group-hover:text-brand-primary transition-colors"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a href="#prospek" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        <i class="fas fa-users w-5 group-hover:text-brand-accent transition-colors"></i>
+                        <span class="font-medium">Data Prospek</span>
+                        <span class="ml-auto text-[10px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded-full font-bold">LIVE</span>
+                    </a>
+                    <a href="#analisis" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        <i class="fas fa-brain w-5 group-hover:text-brand-secondary transition-colors"></i>
+                        <span class="font-medium">AI Insights</span>
+                    </a>
+                    <a href="#tentang" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all group">
+                        <i class="fas fa-info-circle w-5 group-hover:text-white transition-colors"></i>
+                        <span class="font-medium">Tentang</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="mt-auto p-6 border-t border-dark-border bg-dark-surface/50">
+                <button id="logout-btn" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-400 border border-red-500/10 hover:bg-red-500/10 rounded-lg transition-all">
+                    <i class="fas fa-power-off"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-h-screen pt-16 md:pt-0 overflow-hidden relative">
+            
+            <!-- Scrollable Area -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth">
+                
+                <!-- CONTENT: DASHBOARD -->
+                <section id="page-dashboard" class="page-section active max-w-7xl mx-auto">
+                    <header class="mb-6 md:mb-8">
+                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-white mb-1">Performance Overview</h2>
+                        <p class="text-gray-400 text-sm">Real-time analysis of deposit campaign metrics.</p>
+                    </header>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Stat Card 1 -->
+                        <div class="glass-card p-5 rounded-xl border-l-4 border-l-brand-primary">
+                            <p class="text-gray-400 text-xs font-bold uppercase mb-1">Total Nasabah</p>
+                            <h3 class="font-heading text-2xl font-bold text-white" id="stat-total">0</h3>
+                            <div class="mt-2 text-xs flex items-center gap-1 text-green-400">
+                                <i class="fas fa-arrow-up"></i> 12% <span class="text-gray-500">bulan ini</span>
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 2 -->
+                        <div class="glass-card p-5 rounded-xl border-l-4 border-l-brand-accent">
+                            <p class="text-gray-400 text-xs font-bold uppercase mb-1">Hot Leads</p>
+                            <h3 class="font-heading text-2xl font-bold text-white" id="stat-hot">0</h3>
+                            <div class="mt-2 text-xs flex items-center gap-1 text-brand-accent">
+                                <i class="fas fa-fire"></i> High Priority
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 3 -->
+                        <div class="glass-card p-5 rounded-xl border-l-4 border-l-brand-secondary">
+                            <p class="text-gray-400 text-xs font-bold uppercase mb-1">Konversi AI</p>
+                            <h3 class="font-heading text-2xl font-bold text-white">18.5%</h3>
+                            <div class="mt-2 text-xs flex items-center gap-1 text-green-400">
+                                <i class="fas fa-check"></i> +7.3% vs Manual
+                            </div>
+                        </div>
+
+                         <!-- Stat Card 4 -->
+                         <div class="glass-card p-5 rounded-xl border-l-4 border-l-white">
+                            <p class="text-gray-400 text-xs font-bold uppercase mb-1">Call Time</p>
+                            <h3 class="font-heading text-2xl font-bold text-white">2m 45s</h3>
+                            <div class="mt-2 text-xs flex items-center gap-1 text-gray-400">
+                                Optimized
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Chart Main -->
+                        <div class="lg:col-span-2 glass-card p-5 rounded-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-heading font-bold text-white text-base">Distribusi Lead</h3>
+                            </div>
+                            <div class="chart-container relative h-64 w-full">
+                                <canvas id="scoreChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bars -->
+                        <div class="glass-card p-5 rounded-xl">
+                            <h3 class="font-heading font-bold text-white text-base mb-4">Faktor Utama</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="group">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-300">Durasi Kontak</span>
+                                        <span class="text-white">92%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-brand-primary h-full rounded-full w-[92%]"></div>
+                                    </div>
+                                </div>
+                                <div class="group">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-300">Saldo Akun</span>
+                                        <span class="text-white">78%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-brand-secondary h-full rounded-full w-[78%]"></div>
+                                    </div>
+                                </div>
+                                <div class="group">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-300">Pekerjaan</span>
+                                        <span class="text-white">65%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-brand-accent h-full rounded-full w-[65%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CONTENT: PROSPEK -->
+                <section id="page-prospek" class="page-section max-w-7xl mx-auto">
+                    <header class="mb-6 flex flex-col gap-4">
+                        <div>
+                            <h2 class="font-heading text-2xl font-bold text-white mb-1">Daftar Prospek</h2>
+                            <p class="text-gray-400 text-sm">Prioritas lead hari ini berdasarkan AI.</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-2 bg-dark-card p-2 rounded-xl border border-dark-border justify-between items-center">
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <input type="text" id="search-lead" placeholder="Cari nama..." class="bg-transparent text-white text-sm rounded-lg px-3 py-2 focus:outline-none w-full md:w-64 border border-gray-800 focus:border-brand-primary">
+                                <select id="filter-score" class="bg-dark-bg text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none border border-gray-800">
+                                    <option value="all">Semua Skor</option>
+                                    <option value="hot">Hot Only</option>
+                                    <option value="warm">Warm</option>
+                                </select>
+                            </div>
+                            <!-- Pagination Info -->
+                            <div class="text-xs text-gray-400" id="pagination-info">
+                                Menampilkan 1-10 dari 100 data
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="glass-card rounded-xl overflow-hidden border border-white/5 flex flex-col">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left whitespace-nowrap">
+                                <thead class="text-xs text-gray-500 uppercase bg-black/20 font-bold">
+                                    <tr>
+                                        <th class="px-4 py-3">ID</th>
+                                        <th class="px-4 py-3">Nama</th>
+                                        <th class="px-4 py-3">Job</th>
+                                        <th class="px-4 py-3">Score</th>
+                                        <th class="px-4 py-3 text-center">Aksi Cepat</th>
+                                        <th class="px-4 py-3 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leads-table-body" class="divide-y divide-white/5">
+                                    <!-- Javascript will populate this -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div class="p-4 border-t border-white/5 flex justify-between items-center bg-black/20">
+                            <button id="prev-page" class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                                <i class="fas fa-chevron-left mr-1"></i> Prev
+                            </button>
+                            <div class="flex gap-2" id="page-numbers">
+                                <!-- Page numbers will be injected here -->
+                            </div>
+                            <button id="next-page" class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                                Next <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CONTENT: AI INSIGHTS -->
+                <section id="page-analisis" class="page-section max-w-5xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-white">Analisis Model AI</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-2xl border-t border-t-brand-secondary/30">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-brand-secondary/10 flex items-center justify-center text-brand-secondary">
+                                    <i class="fas fa-microscope"></i>
+                                </div>
+                                <h3 class="font-heading font-bold text-white">Research Question 1</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                                "Faktor demografis dan transaksional apa yang paling signifikan?"
+                            </p>
+                            <div class="p-3 bg-white/5 rounded-lg border-l-2 border-brand-secondary text-xs text-gray-300">
+                                <strong>Jawaban:</strong> Durasi kontak terakhir & hasil kampanye sebelumnya adalah prediktor terkuat.
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl border-t border-t-brand-primary/30">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+                                    <i class="fas fa-code-branch"></i>
+                                </div>
+                                <h3 class="font-heading font-bold text-white">Research Question 2</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                                "Model ML mana yang memberikan performa terbaik?"
+                            </p>
+                            <div class="p-3 bg-white/5 rounded-lg border-l-2 border-brand-primary text-xs text-gray-300">
+                                <strong>Jawaban:</strong> XGBoost (AUC 0.94) mengungguli Random Forest & SVM.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CONTENT: TENTANG -->
+                <section id="page-tentang" class="page-section max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="font-heading text-3xl font-bold text-white mb-2">
+                            Tim Kami
+                        </h2>
+                        <p class="text-gray-400 text-sm">A25-CS100 • Capstone Project</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Card 1 -->
+                        <div class="glass-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-bold text-white border border-gray-600">MR</div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">M. Rivaldy Pratama</h4>
+                                <span class="text-xs text-brand-primary block">ML Engineer</span>
+                                <span class="text-[10px] text-gray-500">M318D5Y1369</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="glass-card p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-bold text-white border border-gray-600">EP</div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Eidelwise Prily S.</h4>
+                                <span class="text-xs text-brand-secondary block">ML Engineer</span>
+                                <span class="text-[10px] text-gray-500">M318D5X0520</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Script Modal (Mobile Optimized) -->
+    <div id="script-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden px-4">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 transform transition-all duration-300 scale-95 opacity-0" id="modal-content-box">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-heading text-lg font-bold text-white">Panduan Bicara</h3>
+                <button onclick="closeScriptModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="mb-4">
+                <span id="script-type-badge" class="px-2 py-1 text-xs font-bold rounded bg-brand-primary/20 text-brand-primary">Script</span>
+            </div>
+
+            <div class="bg-black/40 p-4 rounded-xl border border-white/5 mb-4 max-h-60 overflow-y-auto">
+                <p id="script-content" class="text-gray-300 text-sm leading-relaxed italic">...</p>
+            </div>
+
+            <button onclick="closeScriptModal()" class="w-full bg-white/10 text-white font-bold py-3 rounded-xl">Tutup</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // ... existing generator ...
+        function generateLeads(count) {
+            const firstNames = ["Budi", "Siti", "Andi", "Dewi", "Eko", "Fajar", "Gita", "Hendra", "Iwan", "Joko", "Kartika", "Lina", "Maya", "Nina", "Oscar", "Putri", "Rina", "Surya", "Tina", "Umar", "Vina", "Wawan", "Yanti", "Zainal"];
+            const lastNames = ["Santoso", "Aminah", "Pratama", "Lestari", "Kurniawan", "Nugraha", "Pertiwi", "Wijaya", "Saputra", "Susanto", "Hidayat", "Kusuma", "Wibowo", "Sari", "Utami", "Cahyani", "Mulyadi", "Setiawan", "Permana", "Hakim"];
+            const jobs = ["Entrepreneur", "Manager", "Technician", "Admin", "Blue-collar", "Retired", "Student", "Services", "Freelancer", "Consultant"];
+            
+            let data = [];
+            for (let i = 0; i < count; i++) {
+                const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const job = jobs[Math.floor(Math.random() * jobs.length)];
+                const score = Math.random();
+                let prediction = "No";
+                if(score > 0.8) prediction = "Yes";
+                else if(score > 0.5) prediction = "Likely";
+                
+                data.push({
+                    id: `CUST-${1000 + i}`,
+                    name: `${fName} ${lName}`,
+                    job: job,
+                    age: Math.floor(Math.random() * (65 - 22 + 1)) + 22,
+                    score: parseFloat(score.toFixed(2)),
+                    prediction: prediction,
+                    status: 'pending',
+                    phone: `6281${Math.floor(Math.random()*100000000)}`,
+                    email: `${fName.toLowerCase()}.${lName.toLowerCase()}@example.com`
+                });
+            }
+            // Sort by Score desc
+            return data.sort((a,b) => b.score - a.score);
+        }
+
+        let mockLeads = generateLeads(150); // Generate 150 leads
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let filteredLeads = [...mockLeads]; // Store filtered state
+
+        // --- DOM Elements ---
+        const authContainer = document.getElementById('auth-container');
+        const loginView = document.getElementById('login-view');
+        const registerView = document.getElementById('register-view');
+        const forgotView = document.getElementById('forgot-view');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const scriptModal = document.getElementById('script-modal');
+        const modalContentBox = document.getElementById('modal-content-box');
+        
+        let chartInstance = null;
+
+        // --- Toggle Password Logic ---
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggleBtn = document.getElementById(toggleId);
+            const input = document.getElementById(inputId);
+            
+            if (!toggleBtn || !input) return;
+
+            toggleBtn.addEventListener('click', () => {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                // Toggle Icon Class
+                const icon = toggleBtn.querySelector('i');
+                if (type === 'text') {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Initialize Toggles
+        document.addEventListener('DOMContentLoaded', () => {
+            setupPasswordToggle('toggle-login-password', 'password');
+            setupPasswordToggle('toggle-reg-password', 'reg-password');
+        });
+
+        // --- Mobile Menu Logic ---
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleSidebar);
+        document.getElementById('close-sidebar').addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // --- Auth Logic ---
+        document.getElementById('forgot-pass-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginView.classList.add('hidden');
+            forgotView.classList.remove('hidden');
+        });
+
+        document.querySelector('.back-to-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
+        
+        document.getElementById('to-register-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginView.classList.add('hidden');
+            registerView.classList.remove('hidden');
+        });
+
+        document.getElementById('to-login-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            registerView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
+
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Mendaftar...';
+            btn.disabled = true;
+            setTimeout(() => {
+                alert('Akun berhasil dibuat! Silakan masuk.');
+                btn.innerText = originalText;
+                btn.disabled = false;
+                registerView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+            }, 1500);
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            if (u === 'eiz' && p === 'iris') {
+                authContainer.classList.add('hidden');
+                dashboardContainer.classList.remove('hidden');
+                initDashboard();
+            } else {
+                const err = document.getElementById('login-error');
+                err.classList.remove('hidden');
+                setTimeout(() => err.classList.add('hidden'), 3000);
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            dashboardContainer.classList.add('hidden');
+            authContainer.classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            navigateTo('dashboard');
+        });
+
+        // --- Navigation Logic ---
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = item.getAttribute('href').substring(1);
+                navigateTo(targetId);
+                if (window.innerWidth < 768) toggleSidebar();
+            });
+        });
+
+        function navigateTo(pageId) {
+            navItems.forEach(n => {
+                const isActive = n.getAttribute('href') === `#${pageId}`;
+                n.classList.toggle('active', isActive);
+                n.classList.toggle('bg-white/5', isActive);
+                n.classList.toggle('text-white', isActive);
+            });
+
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+        }
+
+        function initDashboard() {
+            const total = mockLeads.length;
+            const hot = mockLeads.filter(l => l.score > 0.8).length;
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-hot').innerText = hot;
+            
+            // Initial filter setting
+            applyFilters();
+            
+            // Delay chart init
+            setTimeout(initChart, 100);
+        }
+
+        // --- Table & Pagination Logic ---
+        function updateLeadStatus(id, newStatus) {
+            const lead = mockLeads.find(l => l.id === id);
+            if (lead) {
+                lead.status = newStatus;
+                applyFilters(false); // false = don't reset page
+            }
+        }
+
+        function applyFilters(resetPage = true) {
+            const searchTerm = document.getElementById('search-lead').value.toLowerCase();
+            const scoreVal = document.getElementById('filter-score').value;
+            
+            filteredLeads = mockLeads.filter(l => 
+                (l.name.toLowerCase().includes(searchTerm)) &&
+                (scoreVal === 'all' || 
+                (scoreVal === 'hot' && l.score > 0.8) || 
+                (scoreVal === 'warm' && l.score > 0.5 && l.score <= 0.8))
+            );
+            
+            // Sort: Pending first, then by Score
+            filteredLeads.sort((a, b) => {
+                if (a.status === 'pending' && b.status !== 'pending') return -1;
+                if (a.status !== 'pending' && b.status === 'pending') return 1;
+                return b.score - a.score;
+            });
+
+            if (resetPage) currentPage = 1;
+            renderTable();
+        }
+
+        document.getElementById('search-lead').addEventListener('input', () => applyFilters(true));
+        document.getElementById('filter-score').addEventListener('change', () => applyFilters(true));
+
+        function renderTable() {
+            const tbody = document.getElementById('leads-table-body');
+            tbody.innerHTML = '';
+            
+            // Pagination Slicing
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedData = filteredLeads.slice(start, end);
+
+            paginatedData.forEach(lead => {
+                let badgeClass = 'text-gray-400';
+                if (lead.score > 0.8) badgeClass = 'text-green-400 font-bold';
+                else if (lead.score > 0.5) badgeClass = 'text-yellow-400 font-bold';
+                else badgeClass = 'text-red-400';
+
+                let opacity = lead.status !== 'pending' ? 'opacity-50' : 'opacity-100';
+
+                let actions = '';
+                if (lead.status === 'pending') {
+                    const waLink = `https://wa.me/${lead.phone}`;
+                    actions = `
+                        <div class="flex gap-2 justify-center">
+                            <a href="${waLink}" target="_blank" class="w-7 h-7 rounded bg-green-500/20 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"><i class="fab fa-whatsapp"></i></a>
+                            <button onclick="openScriptModal('${lead.id}')" class="w-7 h-7 rounded bg-brand-primary/20 text-brand-primary flex items-center justify-center hover:bg-brand-primary hover:text-white transition-colors"><i class="fas fa-comment"></i></button>
+                        </div>
+                    `;
+                } else {
+                    actions = `<span class="text-xs italic text-gray-500">Selesai</span>`;
+                }
+
+                let statusSelect = `
+                    <select onchange="updateLeadStatus('${lead.id}', this.value)" class="bg-black/30 border border-gray-700 text-xs rounded px-1 py-1 w-24 text-gray-300 focus:border-brand-primary focus:outline-none">
+                        <option value="pending" ${lead.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="done" ${lead.status === 'done' ? 'selected' : ''}>Selesai</option>
+                    </select>
+                `;
+
+                const row = `
+                    <tr class="${opacity} border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td class="px-4 py-3 text-gray-500 text-xs font-mono">${lead.id}</td>
+                        <td class="px-4 py-3 text-white">
+                            <div class="font-medium">${lead.name}</div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-400">${lead.job}</td>
+                        <td class="px-4 py-3 ${badgeClass}">${(lead.score * 100).toFixed(0)}%</td>
+                        <td class="px-4 py-3 text-center">${actions}</td>
+                        <td class="px-4 py-3 text-right">${statusSelect}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            renderPaginationUI();
+        }
+
+        function renderPaginationUI() {
+            const totalPages = Math.ceil(filteredLeads.length / rowsPerPage);
+            const pageInfo = document.getElementById('pagination-info');
+            const start = (currentPage - 1) * rowsPerPage + 1;
+            const end = Math.min(currentPage * rowsPerPage, filteredLeads.length);
+            
+            pageInfo.innerText = `Menampilkan ${filteredLeads.length === 0 ? 0 : start}-${end} dari ${filteredLeads.length} data`;
+
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+            const pageNumbersContainer = document.getElementById('page-numbers');
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+            pageNumbersContainer.innerHTML = '';
+            
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.className = `w-8 h-8 rounded-lg text-xs font-bold transition-colors ${i === currentPage ? 'bg-brand-primary text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`;
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
+                pageNumbersContainer.appendChild(btn);
+            }
+        }
+
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredLeads.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        // --- Modal Logic ---
+        function openScriptModal(id) {
+            const lead = mockLeads.find(l => l.id === id);
+            if(!lead) return;
+            
+            const content = document.getElementById('script-content');
+            const badge = document.getElementById('script-type-badge');
+
+            if(lead.score > 0.8) {
+                badge.innerText = "Hot Lead (Prioritas)";
+                badge.className = "px-2 py-1 text-xs font-bold rounded bg-green-500/20 text-green-500";
+                content.innerText = `Halo Bpk/Ibu ${lead.name}, kami memiliki penawaran eksklusif deposito bunga tinggi khusus untuk nasabah prioritas seperti Anda. Penawaran ini terbatas hanya hari ini.`;
+            } else {
+                badge.innerText = "Warm Lead (Edukasi)";
+                badge.className = "px-2 py-1 text-xs font-bold rounded bg-yellow-500/20 text-yellow-500";
+                content.innerText = `Halo Bpk/Ibu ${lead.name}, kami melihat profesi Anda sebagai ${lead.job} sangat cocok untuk program tabungan berjangka kami demi keamanan finansial masa depan.`;
+            }
+
+            scriptModal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContentBox.classList.remove('scale-95', 'opacity-0');
+                modalContentBox.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeScriptModal() {
+            modalContentBox.classList.remove('scale-100', 'opacity-100');
+            modalContentBox.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => scriptModal.classList.add('hidden'), 300);
+        }
+
+        // --- Chart Logic ---
+        function initChart() {
+            if (chartInstance) chartInstance.destroy();
+            
+            const ctx = document.getElementById('scoreChart');
+            if(!ctx) return;
+
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'],
+                    datasets: [{
+                        label: 'Volume',
+                        data: [15, 30, 45, 20, 40], // Dummy chart data representing large dataset
+                        borderColor: '#6366f1',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#000',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
